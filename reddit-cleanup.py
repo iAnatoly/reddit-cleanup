@@ -50,26 +50,16 @@ def cleanup(generator,ttl):
 	print ""
 
 def cleanupAll(name,ttl,callback):
-	print "Cleaning up "+name
-	# while (True):
-	comments = callback(limit=20)
-	if (comments is not None):
-		try:
-			nextElement,rest = comments.next()
-			cleanup(itertools.chain([nextElement], rest),ttl)
-		except TypeError:
-			cleanup(callback(limit=200000),ttl)
-		except StopIteration:
-			print "Done."
-			return;
-	else:
-		return;
+	now = datetime.now();
+	print "Starting clean-up for {0} at {1}".format(name,now);
+	comments = callback(limit=200000);
+	cleanup(comments,ttl);
+	print "Done. Time taken: {0}".format(datetime.now()-now);
 
 config = ConfigHelper.getConfig();
 
 client = praw.Reddit(user_agent=config.userAgent)
 client.login(config.userName,config.password)
-
 
 cleanupAll("Comments",config.ttlDays,client.user.get_comments)
 if (config.deletePosts):
