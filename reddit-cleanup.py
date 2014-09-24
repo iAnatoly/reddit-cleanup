@@ -12,6 +12,7 @@ class Config:
                 self.userName = '';
 		self.password = '';
 		self.deletePosts = True;
+		self.deleteComments = True;
 		self.userAgent='Paranoia/1.0';
 
 class ConfigHelper:
@@ -29,7 +30,8 @@ class ConfigHelper:
                         config.ttlDays = parser.getint('RedditCleanup','ttlDays');
                         config.userName = parser.get('RedditCleanup','userName');
                         config.password = parser.get('RedditCleanup','password');
-                        config.deletePosts = parser.get('RedditCleanup','deletePosts');
+                        config.deletePosts = parser.getboolean('RedditCleanup','deletePosts');
+                        config.deleteComments = parser.getboolean('RedditCleanup','deleteComments');
                 except Exception as e:
                         print "Error reading config {0}:{1}".format(ConfigHelper.getFileName(),e);
 			sys.exit(-1);
@@ -43,9 +45,10 @@ def cleanup(generator,ttl):
 		if (delta.days>ttl):
 			item.delete();
 			sys.stdout.write('.')	
+			sys.stdout.flush()
 		else:
 			sys.stdout.write('_')	
-		sys.stdout.flush()
+			sys.stdout.flush()
 			
 	print ""
 
@@ -61,6 +64,7 @@ config = ConfigHelper.getConfig();
 client = praw.Reddit(user_agent=config.userAgent)
 client.login(config.userName,config.password)
 
-cleanupAll("Comments",config.ttlDays,client.user.get_comments)
+if (config.deleteComments):
+	cleanupAll("Comments",config.ttlDays,client.user.get_comments)
 if (config.deletePosts):
 	cleanupAll("Posts",config.ttlDays,client.user.get_submitted)

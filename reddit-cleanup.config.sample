@@ -3,3 +3,4 @@ ttlDays=7
 username=Unidan
 password=omgOMGomg
 deletePosts=True
+deleteComments=True
